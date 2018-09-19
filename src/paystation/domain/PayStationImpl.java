@@ -1,4 +1,5 @@
 package paystation.domain;
+import java.util.*;
 
 /**
  * Implementation of the pay station.
@@ -24,6 +25,11 @@ public class PayStationImpl implements PayStation {
     private int insertedSoFar;
     private int timeBought;
     private int total;
+    private int nickelCounter = 0;
+    private int dimeCounter = 0;
+    private int qrtrCounter = 0;
+    
+    HashMap<Integer, Integer> map = new HashMap<>();
 
     @Override
     public void addPayment(int coinValue)
@@ -35,6 +41,17 @@ public class PayStationImpl implements PayStation {
             default:
                 throw new IllegalCoinException("Invalid coin: " + coinValue);
         }
+        
+        if(coinValue == 5) {
+            map.put(5, nickelCounter++);
+        }
+        else if(coinValue == 10) {
+            map.put(10, dimeCounter++);
+        }
+        else if(coinValue == 25) {
+            map.put(25, qrtrCounter++);
+        }
+        
         insertedSoFar += coinValue;        
         timeBought = insertedSoFar / 5 * 2;
     }
@@ -47,21 +64,29 @@ public class PayStationImpl implements PayStation {
     @Override
     public Receipt buy() {
         Receipt r = new ReceiptImpl(timeBought);
-        total = r.value();
+        total = insertedSoFar;
         reset();
         return r;
     }
 
     @Override
-    public void cancel() {
+    public HashMap<Integer, Integer> cancel() {
         reset();
+        return map;
     }
     
     private void reset() {
+        nickelCounter = 0;
+        dimeCounter = 0;
+        qrtrCounter = 0;
         timeBought = insertedSoFar = 0;
     }
     
     public int empty() {
-        
+        int temp = total;
+        total = 0;
+        return temp;
     }
 }
+
+
